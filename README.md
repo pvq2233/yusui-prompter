@@ -17,11 +17,19 @@
 
 ## 安装与启动
 
-需要 **Windows 10/11 64 位、Node.js 22.12+（含 npm）和 Python 3.10+**。安装 Python 时启用 **Add to PATH**；安装完工具后重新打开终端。
+### 直接下载 Windows 客户端（推荐）
+
+下载 [最新版 Windows 客户端 ZIP](https://github.com/s2901457171-arch/yusui-prompter/releases/latest/download/Yusui-win-x64.zip)，完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
+
+首次启动自动下载独立 Python 运行环境、Python 识别依赖和 Whisper small 模型，需要联网；下载完成后使用本地缓存。运行环境下载会校验 SHA-256。不要单独移走 EXE，也不要在 ZIP 内直接运行程序。
+
+### 从源码安装
+
+需要 **Windows 10/11 64 位和 Node.js 22.12+（含 npm）**。Python 运行环境由应用下载，不要求事先安装到系统。安装 Node.js 后重新打开终端。
 
 1. 克隆仓库，或用 GitHub 的 **Code → Download ZIP** 下载并完整解压。
 2. 双击 `安装并启动.cmd`。脚本通过 npm 下载前端依赖和 Electron，编译界面、生成程序图标，再构建本地客户端。
-3. 客户端首次启动会通过 pip 下载 Python 依赖，并下载 Whisper small 模型。等待右下角显示“模型已就绪”。首次安装和模型下载需要网络。
+3. 客户端首次启动会下载独立 Python 运行环境，通过 pip 下载识别依赖，并下载 Whisper small 模型。等待右下角显示“模型已就绪”。首次安装和模型下载需要网络。
 4. 之后双击 `启动新版.cmd`，或安装时生成的“语随提词器”快捷方式。无需再次执行安装脚本，也无需打开浏览器。
 
 也可以在 PowerShell 中安装：
@@ -54,7 +62,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 | `node_modules/` | 前端依赖、Electron 下载包 | `npm ci` |
 | `dist/` | 编译后的界面 | `npm run build` |
 | `client/` | 本地生成的 Windows 客户端 | `npm run build:desktop` |
-| `data/runtime/` | 独立 Python 环境及识别依赖 | 客户端首次启动自动创建 |
+| `data/runtime/` | 独立 Python 环境及识别依赖 | 首次启动从 Release 下载运行环境，再通过 pip 安装依赖 |
 | `data/models/` | Whisper small 模型缓存 | 首次加载自动下载 |
 | `data/desktop-profile/` | 用户讲稿、设置与窗口位置 | 使用时本地生成 |
 
@@ -77,6 +85,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -NoBrowser
 ```
 
 开发界面：`npm run dev`；Vite 代理到本机 8765 端口。浏览器回归测试需要 Edge 和运行中的服务：`npm run test:e2e`。桌面回归测试需先构建客户端：`npm run test:desktop`，使用隔离的 8766 端口和 `data/desktop-test-profile/`。设置 `TEST_AUDIO_PATH` 为本地 WAV 文件可运行可选的虚拟麦克风实际识别测试，不打开真实麦克风。
+
+发布时的独立 Python 资产由 `scripts/build-runtime.py --output <目录>` 使用构建机的 Windows Python 生成，包含 Python 许可证和 ensurepip，排除识别依赖、模型及个人数据。该脚本更新 `desktop/runtime-download.json` 中的版本地址和 SHA-256；运行时资产与客户端一起上传到对应版本的 Release。源码仓库继续保持精简。
 
 主要源码：`src/App.tsx`（中控）、`src/Presenter.tsx`（主播窗口）、`desktop/main.cjs`（桌面外壳）、`server/recognizer.py`（模型推理）、`server/core.py`（文字稳定与匹配）、`tracking-options.json`（策略档位）。
 

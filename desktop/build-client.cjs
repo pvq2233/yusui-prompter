@@ -21,5 +21,5 @@ fs.unlinkSync(path.join(destination, 'electron.exe'));
 const resources = path.join(destination, 'resources', 'app');
 fs.mkdirSync(resources, { recursive: true });
 for (const name of ['main.cjs','preload.cjs','loading.html','loading.js','icon.png','icon.ico']) fs.copyFileSync(path.join(__dirname, name), path.join(resources, name));
-fs.writeFileSync(path.join(resources, 'package.json'), JSON.stringify({ name: 'yusui-desktop', productName: '语随提词器', version: '1.1.0', main: 'main.cjs' }, null, 2));
+fs.writeFileSync(path.join(resources, 'package.json'), JSON.stringify({ name: 'yusui-desktop', productName: '语随提词器', version: require('../package.json').version, main: 'main.cjs' }, null, 2));
 console.log(`Desktop client ready: ${path.join(destination, '语随.exe')}`);

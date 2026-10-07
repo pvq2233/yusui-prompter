@@ -109,7 +109,7 @@ async function ensureBackend() {
     adoptOwnedServer();
     const ready = await status();
     if (ready?.app === 'whisper-live-prompter') return;
-    if (backendChild.exitCode !== null && !ownedPid) throw new Error('本地服务启动失败。请检查 data/desktop-service.log；首次使用需要 Python 3.10+ 和网络连接。');
+    if (backendChild.exitCode !== null && !ownedPid) throw new Error('本地服务启动失败。请检查 data/desktop-service.log；首次启动需要联网下载运行环境与识别依赖。');
     await new Promise(resolve => setTimeout(resolve, 300));
   }
   throw new Error('本地服务启动超时，请检查 data/desktop-service.log 后重新启动客户端。');

@@ -17,9 +17,12 @@ if ($null -ne $taskExisting) {
 }
 $taskRuntime = Join-Path $PSScriptRoot 'data/runtime/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $taskRuntime)) {
-    Write-Host 'Preparing a local Python environment...'
-    & python -m venv (Join-Path $PSScriptRoot 'data/runtime')
-    if ($LASTEXITCODE -ne 0) { throw 'Python 3.10+ is required. Install Python and enable Add to PATH.' }
+    & (Join-Path $PSScriptRoot 'ensure-runtime.ps1')
+}
+& $taskRuntime -m pip --version 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    & $taskRuntime -m ensurepip --upgrade
+    if ($LASTEXITCODE -ne 0) { throw 'Could not initialize pip. Check data/runtime and retry.' }
 }
 $taskDependencyStamp = Join-Path $PSScriptRoot 'data/dependencies.sha256'
 $taskHasher = [System.Security.Cryptography.SHA256]::Create()
