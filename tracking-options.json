@@ -1,0 +1,43 @@
+{
+  "similarity": {
+    "title": "文字相似度",
+    "description": "越低越容易跟上漏字、口误，也越容易匹配到相似台词；这是文字相似度，不是语音识别准确率。",
+    "default": 0.77,
+    "choices": [
+      { "value": 0.65, "label": "宽松", "detail": "65%" },
+      { "value": 0.77, "label": "均衡", "detail": "77%" },
+      { "value": 0.88, "label": "严格", "detail": "88%" }
+    ]
+  },
+  "max_jump_chars": {
+    "title": "最大前跳距离",
+    "description": "一次定位最多向前移动多少字，跨段累计，标点与空格不计。跳过句子较多时可调大。",
+    "default": 300,
+    "choices": [
+      { "value": 120, "label": "短距离", "detail": "120 字" },
+      { "value": 300, "label": "中距离", "detail": "300 字" },
+      { "value": 800, "label": "长距离", "detail": "800 字" }
+    ]
+  },
+  "lookahead_paragraphs": {
+    "title": "跨段搜索范围",
+    "description": "允许从当前段向后搜索多少段。与前跳字数同时限制位置；不会自动向前文回跳。",
+    "default": 3,
+    "choices": [
+      { "value": 0, "label": "当前段", "detail": "不跨段" },
+      { "value": 1, "label": "相邻", "detail": "后 1 段" },
+      { "value": 3, "label": "适中", "detail": "后 3 段" },
+      { "value": 6, "label": "较远", "detail": "后 6 段" }
+    ]
+  },
+  "recovery_misses": {
+    "title": "失配重定位",
+    "description": "连续几次新确认的语音未匹配后，扩大到设定的搜索上限。静音不累计；重定位仍遵守相似度和跳转范围。",
+    "default": 2,
+    "choices": [
+      { "value": 1, "label": "灵敏", "detail": "1 次失配" },
+      { "value": 2, "label": "均衡", "detail": "2 次失配" },
+      { "value": 4, "label": "谨慎", "detail": "4 次失配" }
+    ]
+  }
+}

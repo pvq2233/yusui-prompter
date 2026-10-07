@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({ testDir: './e2e', timeout: 45000, workers: 1, use: { baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:8765', browserName: 'chromium', channel: 'msedge', headless: true, viewport: { width: 1440, height: 900 }, screenshot: 'only-on-failure', launchOptions: {args: process.env.TEST_AUDIO_PATH ? ['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream',`--use-file-for-fake-audio-capture=${process.env.TEST_AUDIO_PATH}`] : []} } });
