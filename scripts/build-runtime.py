@@ -6,11 +6,15 @@ import json
 import shutil
 import sys
 import zipfile
+from release_repository import resolve_repository
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--repository', help='Publishing repository (owner/repo); overrides GITHUB_REPOSITORY and package.json')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
+package = json.loads((root / 'package.json').read_text(encoding='utf-8'))
+repository = resolve_repository(package, args.repository)
 output = args.output.resolve()
 output.mkdir(parents=True, exist_ok=True)
 stage = output / 'python-runtime'
@@ -43,10 +47,10 @@ with zipfile.ZipFile(asset, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archi
     for file in sorted(stage.rglob('*')):
         if file.is_file():
             archive.write(file, file.relative_to(stage))
-version = json.loads((root / 'package.json').read_text())['version']
+version = package['version']
 manifest = {
     'python_version': sys.version.split()[0],
-    'url': f'https://github.com/s2901457171-arch/yusui-prompter/releases/download/v{version}/{asset.name}',
+    'url': f'https://github.com/{repository}/releases/download/v{version}/{asset.name}',
     'sha256': hashlib.sha256(asset.read_bytes()).hexdigest(),
     'bytes': asset.stat().st_size,
 }

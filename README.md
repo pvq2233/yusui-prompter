@@ -70,7 +70,7 @@
 
 ### 直接下载 Windows 客户端（推荐）
 
-下载 [最新版 Windows 客户端 ZIP](https://github.com/s2901457171-arch/yusui-prompter/releases/latest/download/Yusui-win-x64.zip)，完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
+下载 [v1.0.0 Windows 客户端 ZIP](https://github.com/pvq2233/yusui-prompter/releases/download/v1.0.0/Yusui-win-x64.zip)（[最新发布](https://github.com/pvq2233/yusui-prompter/releases/latest)），完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
 
 首次启动自动下载独立 Python 运行环境、Python 识别依赖和 Whisper small 模型，需要联网；下载完成后使用本地缓存。运行环境下载会校验 SHA-256。不要单独移走 EXE，也不要在 ZIP 内直接运行程序。
 
@@ -137,7 +137,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -NoBrowser
 
 开发界面：`npm run dev`；Vite 代理到本机 8765 端口。浏览器回归测试需要 Edge 和运行中的服务：`npm run test:e2e`。桌面回归测试需先构建客户端：`npm run test:desktop`，使用隔离的 8766 端口和 `data/desktop-test-profile/`。设置 `TEST_AUDIO_PATH` 为本地 WAV 文件可运行可选的虚拟麦克风实际识别测试，不打开真实麦克风。
 
-发布时的独立 Python 资产由 `scripts/build-runtime.py --output <目录>` 使用构建机的 Windows Python 生成，包含 Python 许可证和 ensurepip，排除识别依赖、模型及个人数据。该脚本更新 `desktop/runtime-download.json` 中的版本地址和 SHA-256；运行时资产与客户端一起上传到对应版本的 Release。源码仓库继续保持精简。
+发布时的独立 Python 资产由 `python scripts/build-runtime.py --output <目录>` 使用构建机的 Windows Python 生成，包含 Python 许可证和 ensurepip，排除识别依赖、模型及个人数据。该脚本更新 `desktop/runtime-download.json` 中的版本地址和 SHA-256；运行时资产与客户端一起上传到对应版本的 Release。源码仓库继续保持精简。
+
+默认发布仓库集中配置在 `package.json` 的 `repository.url`；构建脚本不写死 owner。运行环境生成器依次使用 `--repository owner/repo`、`GITHUB_REPOSITORY` 或该配置。迁移仓库或发布 fork 时，更新这项配置和 README 下载链接，再重新生成清单。
+
+发布前运行 `npm run check:release` 和 `npm run test:release`；`build:desktop` 也会自动检查旧 owner、下载资产名、版本和校验字段。上传后运行 `npm run check:release -- --online` 核对 Release 中客户端资产是否存在，以及 runtime 的 URL、大小和 SHA-256。可以用 `--root <解压目录>` 检查实际发布包，用 `--release-notes <正文文件>` 检查 Release 正文；正文中的截图可使用 `https://raw.githubusercontent.com/<owner>/<repo>/<commit>/docs/screenshots/...`，其中仓库应与发布配置一致。
 
 主要源码：`src/App.tsx`（中控）、`src/Presenter.tsx`（主播窗口）、`desktop/main.cjs`（桌面外壳）、`server/recognizer.py`（模型推理）、`server/core.py`（文字稳定与匹配）、`tracking-options.json`（策略档位）。
 

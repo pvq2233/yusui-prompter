@@ -3,6 +3,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { createHash } = require('node:crypto');
 const root = path.dirname(__dirname);
+require('../scripts/check-release.cjs').checkRelease(root);
 const runtime = path.dirname(require('electron'));
 const destination = path.join(root, 'client');
 if (!fs.existsSync(path.join(root, 'dist', 'index.html'))) throw new Error('Run npm run build first.');

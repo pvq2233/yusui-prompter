@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pvq2233/yusui-prompter.git"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
@@ -10,6 +14,8 @@
     "test:e2e": "playwright test",
     "desktop": "electron desktop/main.cjs",
     "build:desktop": "node desktop/build-client.cjs",
+    "check:release": "node scripts/check-release.cjs",
+    "test:release": "node --test scripts/check-release.test.cjs",
     "test:desktop": "playwright test --config desktop-test.config.ts"
   },
   "dependencies": {
