@@ -7,6 +7,7 @@ import multiprocessing
 import os
 from pathlib import Path
 import struct
+import threading
 import time
 from urllib.parse import urlparse
 
@@ -18,6 +19,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .core import GenerationGate, ScriptAligner, StableTranscript, TrackingConfig
 from .recognizer import warm_model, decode
+from .gpu_runtime import ensure_gpu_runtime
 
 ROOT = Path(__file__).resolve().parent.parent
 PORT = int(os.environ.get("PROMPTER_PORT", "8765"))
@@ -39,23 +41,33 @@ class ModelService:
     def __init__(self):
         self.pool = None
         self.task = None
-        self.status = {"state": "loading", "model": "small", "message": "正在准备 Whisper small，首次使用需下载模型"}
+        self.status = {"state": "loading", "phase": "preparing", "model": "small", "message": "正在检查本地识别环境…"}
         self.active = False
+        self.cancel_setup = threading.Event()
 
     async def load(self):
         if self.status["state"] == "ready":
             return
-        self.status = {"state": "loading", "model": "small", "message": "正在下载或加载 Whisper small…"}
-        if self.pool is None:
-            self.pool = ProcessPoolExecutor(max_workers=1, mp_context=multiprocessing.get_context("spawn"))
+        self.cancel_setup.clear()
+        self.status = {"state": "loading", "phase": "preparing", "model": "small", "message": "正在检查本地识别环境…"}
         config = {"device": os.environ.get("PROMPTER_DEVICE", "auto"), "model_path": os.environ.get("WHISPER_MODEL_PATH"), "cache": str(ROOT / "data" / "models")}
         try:
+            def progress(message):
+                self.status = {"state": "loading", "phase": "gpu", "model": "small", "message": message}
+            await asyncio.to_thread(ensure_gpu_runtime, ROOT, config['device'], progress, self.cancel_setup)
+            self.status = {"state": "loading", "phase": "model", "model": "small", "message": "正在下载或加载 Whisper small…"}
+            if self.pool is None:
+                self.pool = ProcessPoolExecutor(max_workers=1, mp_context=multiprocessing.get_context("spawn"))
             info = await asyncio.get_running_loop().run_in_executor(self.pool, warm_model, config)
             self.status = {"state": "ready", "message": "模型已就绪", **info}
+        except asyncio.CancelledError:
+            self.cancel_setup.set()
+            raise
         except Exception as exc:
-            self.status = {"state": "error", "model": "small", "message": f"模型加载失败：{str(exc)[:500]}。可重试或设置 WHISPER_MODEL_PATH 使用本地 small 模型。"}
-            self.pool.shutdown(wait=False, cancel_futures=True)
-            self.pool = None
+            self.status = {"state": "error", "model": "small", "message": f"识别环境准备失败：{str(exc)[:500]}。请检查网络后点击重试。"}
+            if self.pool:
+                self.pool.shutdown(wait=False, cancel_futures=True)
+                self.pool = None
 
     def start(self):
         if not self.task or self.task.done():
@@ -72,6 +84,7 @@ service = ModelService()
 async def lifespan(app):
     service.start()
     yield
+    service.cancel_setup.set()
     if service.task and not service.task.done():
         service.task.cancel()
     if service.pool:
@@ -97,7 +110,7 @@ async def local_requests(request: Request, call_next):
 
 @app.get("/api/status")
 async def model_status():
-    return {**service.status, "busy": service.active, "app": "whisper-live-prompter", "version": "1.0.0"}
+    return {**service.status, "busy": service.active, "app": "whisper-live-prompter", "version": "1.0.1"}
 
 
 @app.post("/api/model/retry")

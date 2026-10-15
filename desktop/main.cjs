@@ -87,6 +87,12 @@ async function ensureBackend() {
   const existing = await status();
   if (existing) {
     if (existing.app !== 'whisper-live-prompter') throw new Error(`本地端口 ${port} 正被其他程序使用，请关闭占用程序后重新启动。`);
+    while (!closing) {
+      const current = await status();
+      if (!current || current.state !== 'loading' || !['preparing', 'gpu'].includes(current.phase)) break;
+      statusInLoader(current.message);
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
     return;
   }
   const python = path.join(root, 'data', 'runtime', 'Scripts', 'python.exe');
@@ -103,12 +109,15 @@ async function ensureBackend() {
   fs.closeSync(log);
   let spawnError;
   backendChild.once('error', error => { spawnError = error; });
-  const until = Date.now() + (setup ? 10 * 60_000 : 30_000);
+  const until = Date.now() + 35 * 60_000;
   while (Date.now() < until && !closing) {
     if (spawnError) throw new Error(`无法启动本地识别服务：${spawnError.message}`);
     adoptOwnedServer();
     const ready = await status();
-    if (ready?.app === 'whisper-live-prompter') return;
+    if (ready?.app === 'whisper-live-prompter') {
+      if (ready.state !== 'loading' || !['preparing', 'gpu'].includes(ready.phase)) return;
+      statusInLoader(ready.message);
+    }
     if (backendChild.exitCode !== null && !ownedPid) throw new Error('本地服务启动失败。请检查 data/desktop-service.log；首次启动需要联网下载运行环境与识别依赖。');
     await new Promise(resolve => setTimeout(resolve, 300));
   }

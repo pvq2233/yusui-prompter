@@ -14,7 +14,7 @@ import { appearanceStyle, interfaceStyle, readAppearance } from './appearance';
 import { scriptFinished } from './loop';
 
 type Mode = 'following' | 'paused' | 'relocating';
-type ModelStatus = { state: string; model?: string; device?: string; compute_type?: string; message?: string; warning?: string; busy?: boolean };
+type ModelStatus = { state: string; phase?: string; model?: string; device?: string; compute_type?: string; message?: string; warning?: string; busy?: boolean };
 type Line = { text: string; time: string; id: number };
 const labels: Record<Mode, string> = { following: '正在跟读', paused: '跟读已暂停', relocating: '等待语音定位' };
 
@@ -331,6 +331,7 @@ export default function App() {
         <div className="main-toolbar"><div className="view-tabs"><button className={!transcriptMode ? 'selected' : ''} onClick={() => switchMode(false)}><FileText size={16}/>智能跟读</button><button className={transcriptMode ? 'selected' : ''} onClick={() => switchMode(true)}><AudioLines size={16}/>实时转写</button></div><div className="view-controls"><button className={mirror ? 'toggled' : ''} title="镜像文字" aria-label="镜像文字" onClick={() => setMirror(!mirror)}><FlipHorizontal2 size={18}/></button><span/><button title="字号减小" aria-label="字号减小" disabled={fontSize <= 28} onClick={() => setFontSize(s => Math.max(28, s - 2))}>A−</button><label className="font-number">{fontSize}</label><button title="字号增大" aria-label="字号增大" disabled={fontSize >= 72} onClick={() => setFontSize(s => Math.min(72, s + 2))}>A+</button><span/><button aria-label="提词设置" title="提词设置：跟踪策略、显示与语言" onClick={() => setSettings(true)}><Settings2 size={18}/></button><button aria-label="全屏" title="全屏" onClick={() => void fullscreen()}><Maximize size={18}/></button></div></div>
 
         {(error || notice || model.warning) && <div className={`message-bar ${error ? 'error' : ''}`} role={error ? 'alert' : 'status'}><span>{error || notice || model.warning}</span><button aria-label="关闭提示" onClick={() => { setError(''); setNotice(''); if (model.warning) setModel({ ...model, warning: '' }); }}><X size={15}/></button></div>}
+        {model.state === 'loading' && model.phase === 'gpu' && <div className="message-bar" role="status"><span>{model.message}</span></div>}
 
         <section className="prompter-shell reading-appearance" aria-label="提词画面" style={appearanceStyle(appearance)}>
           <div className="stage-info"><span className={`follow-badge ${isPaused ? 'paused' : ''}`}><span/>{followLabel}</span><span className="elapsed"><Circle size={7} fill="currentColor"/>{time}</span></div>

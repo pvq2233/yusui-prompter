@@ -46,7 +46,7 @@ def warm_model(config: dict) -> dict:
         if device != "cuda" or config.get("device") == "cuda":
             _model = None
             raise
-        warning = f"GPU 初始化失败，已切换 CPU INT8（{type(exc).__name__}）"
+        warning = f"GPU 初始化未成功，当前使用 CPU INT8：{str(exc)[:240]}"
         device = "cpu"
         _model = WhisperModel(model_path, device="cpu", compute_type="int8", download_root=config["cache"], cpu_threads=4)
         list(_model.transcribe(np.zeros(16000, dtype=np.float32), language="zh", beam_size=1, vad_filter=False)[0])

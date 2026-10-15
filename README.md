@@ -17,7 +17,13 @@
 
 ## 功能截图
 
-以下截图来自 Windows 客户端，使用虚构案例讲稿。跟读与循环画面使用内置演示，未开启真实麦克风。七张 JPEG 图片合计约 1.1 MB。
+以下截图来自 Windows 客户端，使用虚构案例讲稿。跟读与循环画面使用内置演示，未开启真实麦克风；GPU 准备画面来自实际自动安装测试。
+
+### GPU 加速库自动准备
+
+检测到 NVIDIA 显卡后，自动下载并安装缺少的加速库，启动界面显示当前状态。已有缓存时会复用，已安装齐全时直接加载模型。
+
+![首次启动：自动准备 GPU 加速库并显示下载提示](docs/screenshots/08-gpu-setup.png)
 
 ### 中控与句子定位
 
@@ -68,11 +74,13 @@
 
 ## 安装与启动
 
+**v1.0.1：源码启动和 Release 客户端均支持 GPU 加速库自动安装。** 两种方式共用同一套检测、下载和模型加载流程；无需再手动运行 `enable-gpu.cmd`。旧版客户端不会自行升级程序文件，请下载新版 ZIP 并完整解压。
+
 ### 直接下载 Windows 客户端（推荐）
 
 下载 [最新版 Windows 客户端 ZIP](https://github.com/s2901457171-arch/yusui-prompter/releases/latest/download/Yusui-win-x64.zip)，完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
 
-首次启动自动下载独立 Python 运行环境、Python 识别依赖和 Whisper small 模型，需要联网；下载完成后使用本地缓存。运行环境下载会校验 SHA-256。不要单独移走 EXE，也不要在 ZIP 内直接运行程序。
+首次启动自动下载独立 Python 运行环境、Python 识别依赖和 Whisper small 模型，需要联网；检测到 NVIDIA 显卡且缺少加速库时，会自动下载并安装 cuBLAS / cuDNN，启动界面显示当前下载或安装状态。下载完成后使用本地缓存。运行环境下载会校验 SHA-256。不要单独移走 EXE，也不要在 ZIP 内直接运行程序。
 
 ### 从源码安装
 
@@ -89,7 +97,7 @@
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
-默认使用可用的 NVIDIA GPU（CUDA FP16），否则使用 CPU INT8。需要 GPU 库时，先完成首次启动，再关闭客户端并运行 `enable-gpu.cmd`，通过 pip 下载可选的 NVIDIA cuBLAS / cuDNN 运行库；随后重新启动。GPU 驱动由用户安装，CPU 模式无需这些可选库。
+默认使用可用的 NVIDIA GPU（CUDA FP16），否则使用 CPU INT8。Windows 上检测到 NVIDIA 显卡后会自动检查 GPU 库，缺少时通过 pip 下载并安装，完成后才加载模型。首次 GPU 库约需下载 1.2 GB，已有下载缓存时会复用；已安装齐全时不会重复下载。下载失败会显示原因，点击“重试”可再次安装，详情记录在 `data/gpu-install.log`。`enable-gpu.cmd` 仍可用于手动安装。GPU 驱动由用户安装，没有 NVIDIA 显卡或选择 CPU 模式时不下载 GPU 库。
 
 软件会自动缓存模型到 `data/models/`，以后可读取本地缓存。已有 **CTranslate2 格式的多语言 small 模型**时，可设置 `WHISPER_MODEL_PATH` 指向该模型目录。
 
