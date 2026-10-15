@@ -78,7 +78,7 @@
 
 ### 直接下载 Windows 客户端（推荐）
 
-下载 [最新版 Windows 客户端 ZIP](https://github.com/s2901457171-arch/yusui-prompter/releases/latest/download/Yusui-win-x64.zip)，完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
+下载 [最新版 Windows 客户端 ZIP](https://github.com/pvq2233/yusui-prompter/releases/latest/download/Yusui-win-x64.zip)，完整解压到有写入权限的文件夹，双击 **`启动语随.cmd`**。需要 Windows 10/11 64 位，无需手动安装 Node.js 或 Python，也不需要编译。
 
 首次启动自动下载独立 Python 运行环境、Python 识别依赖和 Whisper small 模型，需要联网；检测到 NVIDIA 显卡且缺少加速库时，会自动下载并安装 cuBLAS / cuDNN，启动界面显示当前下载或安装状态。下载完成后使用本地缓存。运行环境下载会校验 SHA-256。不要单独移走 EXE，也不要在 ZIP 内直接运行程序。
 

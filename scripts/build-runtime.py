@@ -46,7 +46,7 @@ with zipfile.ZipFile(asset, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archi
 version = json.loads((root / 'package.json').read_text())['version']
 manifest = {
     'python_version': sys.version.split()[0],
-    'url': f'https://github.com/s2901457171-arch/yusui-prompter/releases/download/v{version}/{asset.name}',
+    'url': f'https://github.com/pvq2233/yusui-prompter/releases/download/v{version}/{asset.name}',
     'sha256': hashlib.sha256(asset.read_bytes()).hexdigest(),
     'bytes': asset.stat().st_size,
 }
